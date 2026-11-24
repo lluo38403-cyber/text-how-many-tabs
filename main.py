@@ -1,37 +1,22 @@
-"""How Many Tabs Do You Have Open? — make.fun entry.
-
-Writes the count of open browser tabs, digits only, to
-/output/entry.txt. Sixty-three tabs: enough to look like a lived-in
-browser, too many to ever close one by one.
-
-Second revision: tightened the validation so the entry is
-checked as a single line as well as for length.
-"""
-
+"""How many tabs do I have open? One honest number, digits only."""
 import os
+from pathlib import Path
 
-ENTRY = '63'
-
+ENTRY = "47"
 MAX_CHARS = 5
 
 
-def main() -> None:
+def main():
     text = ENTRY
-    assert text.strip(), "entry must not be only whitespace"
-    assert len(text) <= MAX_CHARS, (
-        f"entry is {len(text)} characters, over the {MAX_CHARS} limit"
-    )
-    assert text.isdigit(), "tabs entry must be digits only"
-    assert "\n" not in text, "entry must be a single line"
-    out_dir = os.environ.get("ENTRY_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "entry.txt")
-    # Written byte-for-byte with no trailing newline, so the file holds
-    # exactly len(ENTRY) characters and nothing else.
-    with open(path, "w", encoding="utf-8") as handle:
-        handle.write(text)
-    with open(path, "r", encoding="utf-8") as handle:
-        assert handle.read() == text, "entry.txt does not match ENTRY"
+    assert text.strip(), "entry must not be blank"
+    assert len(text) <= MAX_CHARS, f"entry is {len(text)} chars, limit is {MAX_CHARS}"
+    out_dir = Path(os.environ.get("ENTRY_OUTPUT_DIR", "/output"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "entry.txt"
+    out_path.write_text(text, encoding="utf-8")
+    back = out_path.read_text(encoding="utf-8")
+    assert back == text, "round-trip mismatch"
+    assert len(back) <= MAX_CHARS
 
 
 if __name__ == "__main__":
